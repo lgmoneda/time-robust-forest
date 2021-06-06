@@ -1,0 +1,10 @@
+# This file contains values from Cookiecutter
+
+default_context:
+  project_name: "time-robust-forest"
+  project_description: "Explores time information to train a robust random forest"
+  organization: "lgmoneda"
+  license: "BSD-3"
+  version: "0.1.0"
+  github_name: "lgmoneda"
+  email: "lgmoneda@gmail.com"
