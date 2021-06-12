@@ -22,6 +22,35 @@ A Proof of concept model that explores timestamp information to train a random f
 pip install -U time-robust-forest
 ```
 
+## How to use it
+
+There are a classifier and a regressor under `time_robust_forest.models`. They follow the sklearn interface, which means you can quickly fit and use a model:
+
+```python
+from time_robust_forest.models import TimeForestClassifier
+
+features = ["x_1", "x_2"]
+time_column = "periods"
+target = "y"
+
+model.fit(training_data[features + [time_column]], training_data[target])
+predictions = model.predict_proba(test_data[features])[:, 1]
+```
+
+There are only a few arguments that differ from a traditional Random Forest. two arguments
+
+- time_column: the column from the input dataframe containing the time
+periods the model will iterate over to find the best splits (default: "period")
+- min_sample_periods: the number of examples in every period the model needs
+to keep while it splits.
+- period_criterion: how the performance in every period is going to be
+aggregated. Options: {"avg": average, "max": maximum, the worst case}.
+(default: "avg")
+
+### Make sure you have a good choice for the time column
+
+Don't simply use a timestamp column from the dataset, make it discrete before and guarantee there is a reasonable amount of data points in every period. Example: use year if you have 3+ years of data. Notice the choice to make it discrete becomes a modeling choice you can optimize.
+
 ## License
 
 [![License](https://img.shields.io/github/license/lgmoneda/time-robust-forest)](https://github.com/lgmoneda/time-robust-forest/blob/main/LICENSE)
