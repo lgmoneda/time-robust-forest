@@ -12,6 +12,8 @@
 [![Semantic Versions](https://img.shields.io/badge/%F0%9F%9A%80-semantic%20versions-informational.svg)](https://github.com/lgmoneda/time-robust-forest/releases)
 [![License](https://img.shields.io/github/license/lgmoneda/time-robust-forest)](https://github.com/lgmoneda/time-robust-forest/blob/main/LICENSE)
 
+</div>
+
 A Proof of concept model that explores timestamp information to train a random forest with better Out of Distribution generalization power.
 
 ## Installation
@@ -20,13 +22,13 @@ A Proof of concept model that explores timestamp information to train a random f
 pip install -U time-robust-forest
 ```
 
-## 🛡 License
+## License
 
 [![License](https://img.shields.io/github/license/lgmoneda/time-robust-forest)](https://github.com/lgmoneda/time-robust-forest/blob/main/LICENSE)
 
 This project is licensed under the terms of the `BSD-3` license. See [LICENSE](https://github.com/lgmoneda/time-robust-forest/blob/main/LICENSE) for more details.
 
-## 📃 Citation
+## Citation
 
 ```
 @misc{time-robust-forest,
