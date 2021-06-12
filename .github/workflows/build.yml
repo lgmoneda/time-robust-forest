@@ -16,9 +16,6 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: upgrade pip
-      run: pip install --upgrade pip
-
     - name: Install poetry
       run: make download-poetry
 
