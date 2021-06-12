@@ -1,1 +1,0 @@
-# type: ignore[attr-defined]

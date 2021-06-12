@@ -141,7 +141,7 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
         """
         predictions = [model.predict(X) for model in self.n_estimators_]
 
-        if type(X) == "numpy.darray":
+        if type(X).__module__ == np.__name__:
             X = pd.DataFrame(X)
 
         predictions = [model.predict(X) for model in self.n_estimators_]
@@ -300,7 +300,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         sklearn interface and provide a n_samples rows and two columns. To get
         the positive likelihood, use predicted_proba[:, 1].
         """
-        if type(X) == "numpy.darray":
+        if type(X).__module__ == np.__name__:
             X = pd.DataFrame(X)
 
         predictions = [model.predict(X) for model in self.n_estimators_]
@@ -436,7 +436,7 @@ class _RandomTimeSplitTree:
         self.verbose = verbose
         self.split_verbose = split_verbose
         self.max_features = max_features
-        self.split_variable = None
+        self.split_variable = "LEAF"
         self.bootstrapping = bootstrapping
         self.criterion = criterion
         self.period_criterion = period_criterion
@@ -640,7 +640,7 @@ class _RandomTimeSplitTree:
         """
         Auxiliary function to predict a single row recursively.
         """
-        if self._is_leaf:
+        if self._is_leaf():
             return self.value
         tree = (
             self.left_split
@@ -654,13 +654,13 @@ class _RandomTimeSplitTree:
         """
         Returns the splitting variable name for the current tree instance.
         """
-        if not self._is_leaf:
+        if not self._is_leaf():
             return (
                 self.split_variable
                 + "@"
-                + self.left_split._get_split_variable
+                + self.left_split._get_split_variable()
                 + "@"
-                + self.right_split._get_split_variable
+                + self.right_split._get_split_variable()
             )
         return "LEAF"
 
@@ -671,7 +671,7 @@ class _RandomTimeSplitTree:
 
         It returns a ordered dataframe with feature names and number of splits.
         """
-        splits = self._get_split_variable
+        splits = self._get_split_variable()
         splits_features = splits.replace("@LEAF", "").split("@")
 
         return (

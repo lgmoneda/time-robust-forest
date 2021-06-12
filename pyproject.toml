@@ -32,7 +32,7 @@ classifiers = [  # Update me
 "time-robust-forest" = "time_robust_forest.__main__:app"
 
 [tool.poetry.dependencies]
-python = "^3.6.3"
+python = "^3.6"
 importlib_metadata = {version = ">=1.6,<5.0", python = "<3.8"}
 typer = {extras = ["all"], version = "^0.3.2"}
 rich = ">=9.8.2,<11.0.0"

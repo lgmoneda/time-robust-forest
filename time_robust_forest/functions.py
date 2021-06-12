@@ -1,3 +1,5 @@
+from typing import Dict, Union
+
 import math
 import pdb
 
@@ -38,7 +40,7 @@ def initialize_period_dict(periods):
     Initialize the period dict with all the distinct periods as key, and
     the needed keys to calculate the loss function.
     """
-    period_dict = {}
+    period_dict: Dict[Union[str, int], Dict[str, float]] = {}
     for period in periods:
         period_dict[period] = {}
         period_dict[period]["count"] = 0
