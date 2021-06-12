@@ -1,11 +1,9 @@
 # type: ignore[attr-defined]
-"""Explores time information to train a robust random forest"""
 
 try:
-    from importlib.metadata import version, PackageNotFoundError
+    from importlib.metadata import PackageNotFoundError, version
 except ImportError:  # pragma: no cover
-    from importlib_metadata import version, PackageNotFoundError
-
+    from importlib_metadata import PackageNotFoundError, version
 
 try:
     __version__ = version(__name__)
