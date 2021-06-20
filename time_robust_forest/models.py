@@ -482,7 +482,7 @@ class _RandomTimeSplitTree:
                         min_sample_periods
                     )
                 )
-        elif self.depth <= self.max_depth:
+        if self.depth <= self.max_depth:
             self.create_split()
 
     def create_split(self):
