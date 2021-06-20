@@ -166,7 +166,7 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
         return (
             pd.concat(
                 [
-                    n_estimator.feature_importance()
+                    n_estimator.feature_importance
                     for n_estimator in self.n_estimators_
                 ]
             )
@@ -342,7 +342,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         return (
             pd.concat(
                 [
-                    n_estimator.feature_importance()
+                    n_estimator.feature_importance
                     for n_estimator in self.n_estimators_
                 ]
             )
@@ -482,7 +482,7 @@ class _RandomTimeSplitTree:
                         min_sample_periods
                     )
                 )
-        if self.depth <= self.max_depth:
+        elif self.depth <= self.max_depth:
             self.create_split()
 
     def create_split(self):
@@ -501,7 +501,7 @@ class _RandomTimeSplitTree:
                 self.find_better_split(variable, idx)
         if self.score == float("inf"):
             return False
-        x = self._split_column()
+        x = self._split_column
 
         left_split = np.nonzero(x <= self.split_example)
         right_split = np.nonzero(x > self.split_example)
