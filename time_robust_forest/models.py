@@ -139,7 +139,13 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
         - average_prediction: outputs the average prediction from the
         n_estimators.
         """
-        predictions = [model.predict(X) for model in self.n_estimators_]
+        # predictions = [model.predict(X) for model in self.n_estimators_]
+        if self.multi:
+            predictions = Parallel(n_jobs=self.n_jobs, verbose=0)(
+                delayed(model.predict)(X) for model in self.n_estimators_
+            )
+        else:
+            predictions = [model.predict(X) for model in self.n_estimators_]
 
         if type(X).__module__ == np.__name__:
             X = pd.DataFrame(X)
@@ -303,7 +309,13 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         if type(X).__module__ == np.__name__:
             X = pd.DataFrame(X)
 
-        predictions = [model.predict(X) for model in self.n_estimators_]
+        if self.multi:
+            predictions = Parallel(n_jobs=self.n_jobs, verbose=0)(
+                delayed(model.predict)(X) for model in self.n_estimators_
+            )
+        else:
+            predictions = [model.predict(X) for model in self.n_estimators_]
+
         positive_proba = np.mean(np.array(predictions), axis=0)
         negative_proba = np.ones(len(positive_proba)) - positive_proba
 
