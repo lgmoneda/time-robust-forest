@@ -217,6 +217,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         min_sample_periods=100,
         max_features="auto",
         bootstrapping=True,
+        criterion="gini",
         period_criterion="avg",
         n_jobs=-1,
         multi=True,
@@ -229,6 +230,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         self.n_jobs = n_jobs
         self.multi = multi
         self.bootstrapping = bootstrapping
+        self.criterion = criterion
         self.period_criterion = period_criterion
 
     def fit(self, X, y, sample_weight=None, verbose=False):
@@ -270,7 +272,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
                     row_indexes=[],
                     verbose=verbose,
                     max_features=self.max_features,
-                    criterion="gini",
+                    criterion=self.criterion,
                     period_criterion=self.period_criterion,
                     random_state=i,
                 )
@@ -291,7 +293,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
                     verbose=verbose,
                     max_features=self.max_features,
                     period_criterion=self.period_criterion,
-                    criterion="gini",
+                    criterion=self.criterion,
                     random_state=i,
                 )
                 for i in range(self.n_estimators)
