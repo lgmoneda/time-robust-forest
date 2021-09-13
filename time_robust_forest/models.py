@@ -530,6 +530,9 @@ class _RandomTimeSplitTree:
             min_sample_periods=self.min_sample_periods,
             time_column=self.time_column,
             max_depth=self.max_depth,
+            min_leaf=self.min_leaf,
+            criterion=self.criterion,
+            period_criterion=self.period_criterion,
             sample_weight=self.sample_weight,
             verbose=self.verbose,
         )
@@ -543,6 +546,9 @@ class _RandomTimeSplitTree:
             min_sample_periods=self.min_sample_periods,
             time_column=self.time_column,
             max_depth=self.max_depth,
+            min_leaf=self.min_leaf,
+            criterion=self.criterion,
+            period_criterion=self.period_criterion,
             sample_weight=self.sample_weight,
             verbose=self.verbose,
         )
