@@ -184,28 +184,35 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
 
 class TimeForestClassifier(BaseEstimator, ClassifierMixin):
     """
-        Time Forest Classifier Estimator.
+    Time Forest Classifier Estimator.
 
-        Arguments:
-        - n_estimators: number of estimators to compose the ensemble (default: 5)
-        - time_column: the column from the input dataframe containing the time
-        periods the model will iterate over to find the best splits (default: "period")
-        - max_depth: the maximum depth the trees are enabled to split (default: 5)
-        - min_leaf: minimum number of total examples to split. It doesn't make any
-    difference in cases min_leaf < |time_periods| * min_sample_periods (default: 5)
-        - min_sample_periods: the number of examples in every period the model needs
-        to keep while it splits.
-        - max_features: the maximum number of features to be considered in a split.
-        It is a fraction, so 1.0 is equivalent to use all the features. The default
-        uses a common heuristic to define it(default: "auto")
-        - bootstrapping: to perform bootstrapping before providing the input data to
-        every estimator (default: True)
-        - period_criterion: how the performance in every period is going to be
-        aggregated. Options: {"avg": average, "max": maximum, the worst case}.
-        (default: "avg")
-        - n_jobs: number of cores to use when the parameter multi=True
-        - multi: boolean to learn or not the many estimators in parallel
-        (default: True)
+    Arguments:
+    - n_estimators: number of estimators to compose the ensemble
+    (default: 5)
+    - time_column: the column from the input dataframe containing the time
+    periods the model will iterate over to find the best splits
+    (default: "period")
+    - max_depth: the maximum depth the trees are enabled to split
+    (default: 5)
+    - min_leaf: minimum number of total examples to split. It doesn't make
+    any difference in cases min_leaf < |time_periods| * min_sample_periods
+    (default: 5)
+    - min_sample_periods: the number of examples in every period the model
+    needs to keep while it splits.
+    - max_features: the maximum number of features to be considered in a
+    split. It is a fraction, so 1.0 is equivalent to use all the features.
+    The default uses a common heuristic to define it(default: "auto")
+    - bootstrapping: to perform bootstrapping before providing the input
+    data to every estimator (default: True)
+    - criterion: the split criterion to evaluate its quality. Options:
+    {"gini": gini score, "std": standard deviation, "std_norm": normalized
+    standard deviation}
+    - period_criterion: how the performance in every period is going to be
+    aggregated. Options: {"avg": average, "max": maximum, the worst case}.
+    (default: "avg")
+    - n_jobs: number of cores to use when the parameter multi=True
+    - multi: boolean to learn or not the many estimators in parallel
+    (default: True)
     """
 
     def __init__(
@@ -595,7 +602,7 @@ class _RandomTimeSplitTree:
             right_period_dict[period_i]["sum"] -= y_i * weight_i
             left_period_dict[period_i]["sum"] += y_i * weight_i
 
-            if self.criterion == "std":
+            if self.criterion == "std" or self.criterion == "std_norm":
                 right_period_dict[period_i]["squared_sum"] -= (
                     y_i ** 2
                 ) * weight_i

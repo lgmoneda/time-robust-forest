@@ -142,7 +142,7 @@ def test_fill_right_dict(periods, target, weights, right_dict, expected):
             },
             "std",
             "avg",
-            0.25,
+            0.5,
         ),
         (
             {
@@ -154,6 +154,32 @@ def test_fill_right_dict(periods, target, weights, right_dict, expected):
                 1: {"count": 1, "sum": 1, "squared_sum": 1},
             },
             "std",
+            "max",
+            1.0,
+        ),
+        (
+            {
+                0: {"count": 0, "sum": 0, "squared_sum": 0},
+                1: {"count": 0, "sum": 0, "squared_sum": 0},
+            },
+            {
+                0: {"count": 2, "sum": 1, "squared_sum": 1},
+                1: {"count": 1, "sum": 1, "squared_sum": 1},
+            },
+            "std_norm",
+            "avg",
+            0.25,
+        ),
+        (
+            {
+                0: {"count": 0, "sum": 0, "squared_sum": 0},
+                1: {"count": 0, "sum": 0, "squared_sum": 0},
+            },
+            {
+                0: {"count": 2, "sum": 1, "squared_sum": 1},
+                1: {"count": 1, "sum": 1, "squared_sum": 1},
+            },
+            "std_norm",
             "max",
             0.5,
         ),
@@ -233,7 +259,7 @@ def test_score_by_period(
     ],
 )
 def test_std_score_by_period(right_dict, left_dict, expected):
-    assert std_score_by_period(right_dict, left_dict) == expected
+    assert std_score_by_period(right_dict, left_dict, norm=True) == expected
 
 
 @pytest.mark.parametrize(
