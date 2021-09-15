@@ -86,6 +86,9 @@ def score_by_period(
     if criterion == "std":
         current_score = std_score_by_period(right_dict, left_dict)
 
+    if criterion == "std_norm":
+        current_score = std_score_by_period(right_dict, left_dict, norm=True)
+
     if verbose:
         print(f"Score {criterion} by period: {current_score}")
 
@@ -95,7 +98,7 @@ def score_by_period(
         return np.max(current_score)
 
 
-def std_score_by_period(right_dict, left_dict):
+def std_score_by_period(right_dict, left_dict, norm=False):
     """
     Calculate the standard deviation score by period given two dictionaries that
     charactize the left and right leaf after the potential split.
@@ -115,11 +118,17 @@ def std_score_by_period(right_dict, left_dict):
             right_dict[key]["squared_sum"],
         )
 
-        total_count = left_dict[key]["count"] + right_dict[key]["count"]
-        current_score.append(
-            left_std * (left_dict[key]["count"] / total_count)
-            + right_std * (right_dict[key]["count"] / total_count)
-        )
+        if norm:
+            total_count = left_dict[key]["count"] + right_dict[key]["count"]
+            current_score.append(
+                left_std * (left_dict[key]["count"] / total_count)
+                + right_std * (right_dict[key]["count"] / total_count)
+            )
+        else:
+            current_score.append(
+                left_std * left_dict[key]["count"]
+                + right_std * right_dict[key]["count"]
+            )
 
     return current_score
 
