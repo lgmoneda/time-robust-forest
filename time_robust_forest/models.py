@@ -541,9 +541,6 @@ class _RandomTimeSplitTree:
         if self.score == float("inf"):
             return False
         x = self._split_column()
-        print(
-            f"Split: variable {self.split_variable}, value: {self.split_example}, score: {self.score}, decrease: {self.impurity_decrease}, by_period: {self.score_by_period}"
-        )
 
         left_split = np.nonzero(x <= self.split_example)
         right_split = np.nonzero(x > self.split_example)
@@ -655,7 +652,7 @@ class _RandomTimeSplitTree:
             if self.split_verbose:
                 print(f"Evaluate a split on variable {variable} at value {x_i}")
 
-            current_score, current_score_by_period = score_by_period(
+            current_score = score_by_period(
                 right_period_dict,
                 left_period_dict,
                 self.criterion,
@@ -680,7 +677,6 @@ class _RandomTimeSplitTree:
                     )
                     self.split_variable_idx = variable_idx
                     self.impurity_decrease = impurity_decrease
-                    self.score_by_period = current_score_by_period
 
     def _is_leaf(self):
         """

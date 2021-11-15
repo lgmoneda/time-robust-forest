@@ -95,9 +95,9 @@ def score_by_period(
         print(f"Score {criterion} by period: {current_score}")
 
     if period_criterion == "avg":
-        return np.mean(current_score), current_score
+        return np.mean(current_score)
     else:
-        return np.max(current_score), current_score
+        return np.max(current_score)
 
 
 def impurity_decrease_by_period(
