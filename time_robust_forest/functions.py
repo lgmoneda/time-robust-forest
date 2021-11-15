@@ -81,7 +81,9 @@ def score_by_period(
     aggregation.
     """
     if criterion == "gini":
-        current_score = gini_impurity_score_by_period(right_dict, left_dict)
+        current_score = gini_impurity_score_by_period(
+            right_dict, left_dict, verbose=verbose
+        )
 
     if criterion == "std":
         current_score = std_score_by_period(right_dict, left_dict)
@@ -93,9 +95,55 @@ def score_by_period(
         print(f"Score {criterion} by period: {current_score}")
 
     if period_criterion == "avg":
-        return np.mean(current_score)
+        return np.mean(current_score), current_score
     else:
-        return np.max(current_score)
+        return np.max(current_score), current_score
+
+
+def impurity_decrease_by_period(
+    right_dict,
+    left_dict,
+    total_sample,
+    period_criterion="avg",
+    verbose=False,
+):
+
+    impurity_decreases = []
+
+    for key in right_dict.keys():
+        total_count = left_dict[key]["count"] + right_dict[key]["count"]
+        total_positive = left_dict[key]["sum"] + right_dict[key]["sum"]
+        p_positive = total_positive / total_count
+
+        previous_impurity = 1 - ((1 - p_positive) ** 2 + (p_positive) ** 2)
+
+        left_proba = left_dict[key]["sum"] / float(left_dict[key]["count"])
+        left_gini = 1 - ((1 - left_proba) ** 2 + (left_proba) ** 2)
+
+        right_proba = right_dict[key]["sum"] / float(right_dict[key]["count"])
+        right_gini = 1 - ((1 - right_proba) ** 2 + (right_proba) ** 2)
+
+        score = left_gini * (
+            left_dict[key]["count"] / total_count
+        ) + right_gini * (right_dict[key]["count"] / total_count)
+
+        impurity_decrease = (
+            total_count / total_sample[key] * (previous_impurity - score)
+        )
+
+        if verbose:
+            print(
+                "Period: {}, score:{}, left: {}, right: {}, impurity decrease: {}".format(
+                    key, score, left_gini, right_gini, impurity_decrease
+                )
+            )
+
+        impurity_decreases.append(impurity_decrease)
+
+    if period_criterion == "avg":
+        return np.mean(impurity_decreases)
+    else:
+        return np.min(impurity_decreases)
 
 
 def std_score_by_period(right_dict, left_dict, norm=False):
@@ -133,7 +181,7 @@ def std_score_by_period(right_dict, left_dict, norm=False):
     return current_score
 
 
-def gini_impurity_score_by_period(right_dict, left_dict):
+def gini_impurity_score_by_period(right_dict, left_dict, verbose=False):
     """
     Calculate the gini impurity score by period given two dictionaries that
     charactize the left and right leaf after the potential split.
