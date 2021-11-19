@@ -1,9 +1,6 @@
-import math
-import pdb
-
-import numpy as np
 import pandas as pd
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import make_scorer, roc_auc_score
+from sklearn.model_selection import GridSearchCV, KFold
 
 
 def extract_results_from_grid_cv(cv_results, kfolds, envs):
@@ -65,7 +62,7 @@ def leave_one_env_out_cv(data, env_column="period", cv=5):
     return cv_sets
 
 
-def grid_search(X, y, model, params_grid, env_cvs, score):
+def grid_search(X, y, model, param_grid, env_cvs, score):
     """
     FIt the grid search and return it.
     """
@@ -84,7 +81,7 @@ def grid_search(X, y, model, params_grid, env_cvs, score):
 
 
 def env_wise_hyper_opt(
-    X, y, model, env_column, params_grid, cv=5, score=roc_auc_score
+    X, y, model, env_column, param_grid, cv=5, score=roc_auc_score
 ):
     """
     Optimize the hyper parmaters of a model considering the leave one env out
@@ -93,13 +90,11 @@ def env_wise_hyper_opt(
     """
     env_cvs = leave_one_env_out_cv(X, env_column, cv)
 
-    grid_cv = grid_search(X, y, model, params_grid, env_cvs)
+    grid_cv = grid_search(X, y, model, param_grid, env_cvs, score)
 
     envs = X[env_column].unique()
-    results_df = extract_results_from_grid_cv(
-        grid_cv.cv_results_, cv, envs, bench_holdout
-    )
+    results_df = extract_results_from_grid_cv(grid_cv.cv_results_, cv, envs)
 
-    opt_params, raw_df = select_best_model_from_results_df(results_df)
+    opt_params = select_best_model_from_results_df(results_df)
 
     return opt_params
