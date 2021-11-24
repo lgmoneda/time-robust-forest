@@ -56,7 +56,7 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
         min_impurity_decrease=0,
         n_jobs=-1,
         multi=True,
-        random_state=42
+        random_state=42,
     ):
         self.min_leaf, self.max_depth = min_leaf, max_depth
         self.time_column = time_column
@@ -234,7 +234,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         min_impurity_decrease=0,
         n_jobs=-1,
         multi=True,
-        random_state=42
+        random_state=42,
     ):
         self.min_leaf, self.max_depth = min_leaf, max_depth
         self.time_column = time_column
