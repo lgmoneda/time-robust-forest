@@ -4,8 +4,8 @@ from multiprocessing import Pool, cpu_count
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
-from sklearn import metrics
 from numpy.random import default_rng
+from sklearn import metrics
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from time_robust_forest.functions import (
     check_min_sample_periods,
