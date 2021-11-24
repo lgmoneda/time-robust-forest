@@ -4,6 +4,7 @@ from multiprocessing import Pool, cpu_count
 import numpy as np
 import pandas as pd
 from joblib import Parallel, delayed
+from numpy.random import default_rng
 from sklearn import metrics
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from time_robust_forest.functions import (
@@ -55,6 +56,7 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
         min_impurity_decrease=0,
         n_jobs=-1,
         multi=True,
+        random_state=42,
     ):
         self.min_leaf, self.max_depth = min_leaf, max_depth
         self.time_column = time_column
@@ -65,6 +67,7 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
         self.multi = multi
         self.bootstrapping = bootstrapping
         self.period_criterion = period_criterion
+        self.random_state = random_state
 
     def fit(self, X, y, sample_weight=None, verbose=False):
         """
@@ -107,7 +110,7 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
                     max_features=self.max_features,
                     criterion="std",
                     period_criterion=self.period_criterion,
-                    random_state=i,
+                    random_state=i + self.random_state,
                 )
                 for i in range(self.n_estimators)
             ]
@@ -127,7 +130,7 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
                     max_features=self.max_features,
                     period_criterion=self.period_criterion,
                     criterion="std",
-                    random_state=i,
+                    random_state=i + self.random_state,
                 )
                 for i in range(self.n_estimators)
             )
@@ -231,6 +234,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         min_impurity_decrease=0,
         n_jobs=-1,
         multi=True,
+        random_state=42,
     ):
         self.min_leaf, self.max_depth = min_leaf, max_depth
         self.time_column = time_column
@@ -243,6 +247,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         self.criterion = criterion
         self.period_criterion = period_criterion
         self.min_impurity_decrease = min_impurity_decrease
+        self.random_state = random_state
 
     def fit(self, X, y, sample_weight=None, verbose=False):
         """
@@ -288,7 +293,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
                     period_criterion=self.period_criterion,
                     min_impurity_decrease=self.min_impurity_decrease,
                     total_sample=self.total_sample,
-                    random_state=i,
+                    random_state=i + self.random_state,
                 )
                 for i in range(self.n_estimators)
             ]
@@ -310,7 +315,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
                     min_impurity_decrease=self.min_impurity_decrease,
                     total_sample=self.total_sample,
                     criterion=self.criterion,
-                    random_state=i,
+                    random_state=i + self.random_state,
                 )
                 for i in range(self.n_estimators)
             )
@@ -479,6 +484,7 @@ class _RandomTimeSplitTree:
         self.period_criterion = period_criterion
         self.min_impurity_decrease = min_impurity_decrease
         self.total_sample = total_sample
+        self.rng = default_rng(random_state)
 
         if sample_weight is not None:
             self.sample_weight = sample_weight
@@ -532,7 +538,7 @@ class _RandomTimeSplitTree:
         considering this chosen set, perform the split and make the
         recursive call to build sub tress using the result splits.
         """
-        variables_to_consider = np.random.choice(
+        variables_to_consider = self.rng.choice(
             self.variables, self.max_n_variables, replace=False
         )
         for idx, variable in enumerate(self.variables):
