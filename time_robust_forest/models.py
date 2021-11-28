@@ -19,28 +19,26 @@ from time_robust_forest.functions import (
 
 class TimeForestRegressor(BaseEstimator, RegressorMixin):
     """
-        Time Forest Regressor Estimator.
+    Time Forest Regressor Estimator.
 
-        Arguments:
-        - n_estimators: number of estimators to compose the ensemble (default: 5)
-        - time_column: the column from the input dataframe containing the time
-        periods the model will iterate over to find the best splits (default: "period")
-        - max_depth: the maximum depth the trees are enabled to split (default: 5)
-        - min_leaf: minimum number of total examples to split. It doesn't make any
-    difference in cases min_leaf < |time_periods| * min_sample_periods (default: 5)
-        - min_sample_periods: the number of examples in every period the model needs
-        to keep while it splits.
-        - max_features: the maximum number of features to be considered in a split.
-        It is a fraction, so 1.0 is equivalent to use all the features. The default
-        uses a common heuristic to define it(default: "auto")
-        - bootstrapping: to perform bootstrapping before providing the input data to
-        every estimator (default: True)
-        - period_criterion: how the performance in every period is going to be
-        aggregated. Options: {"avg": average, "max": maximum, the worst case}.
-        (default: "avg")
-        - n_jobs: number of cores to use when the parameter multi=True
-        - multi: boolean to learn or not the many estimators in parallel
-        (default: True)
+    Arguments:
+    - n_estimators: number of estimators to compose the ensemble (default: 5)
+    - time_column: the column from the input dataframe containing the time
+    periods the model will iterate over to find the best splits (default: "period")
+    - max_depth: the maximum depth the trees are enabled to split (default: 5)
+    - min_sample_periods: the number of examples in every period the model needs
+    to keep while it splits.
+    - max_features: the maximum number of features to be considered in a split.
+    It is a fraction, so 1.0 is equivalent to use all the features. The default
+    uses a common heuristic to define it(default: "auto")
+    - bootstrapping: to perform bootstrapping before providing the input data to
+    every estimator (default: True)
+    - period_criterion: how the performance in every period is going to be
+    aggregated. Options: {"avg": average, "max": maximum, the worst case}.
+    (default: "avg")
+    - n_jobs: number of cores to use when the parameter multi=True
+    - multi: boolean to learn or not the many estimators in parallel
+    (default: True)
     """
 
     def __init__(
@@ -48,7 +46,6 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
         n_estimators=5,
         time_column="period",
         max_depth=5,
-        min_leaf=5,
         min_sample_periods=100,
         max_features="auto",
         bootstrapping=True,
@@ -58,7 +55,7 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
         multi=True,
         random_state=42,
     ):
-        self.min_leaf, self.max_depth = min_leaf, max_depth
+        self.max_depth = max_depth
         self.time_column = time_column
         self.min_sample_periods = min_sample_periods
         self.n_estimators = n_estimators
@@ -101,7 +98,6 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
                     y,
                     min_sample_periods=self.min_sample_periods,
                     max_depth=self.max_depth,
-                    min_leaf=self.min_leaf,
                     bootstrapping=self.bootstrapping,
                     sample_weight=sample_weight,
                     time_column=self.time_column,
@@ -121,7 +117,6 @@ class TimeForestRegressor(BaseEstimator, RegressorMixin):
                     y,
                     min_sample_periods=self.min_sample_periods,
                     max_depth=self.max_depth,
-                    min_leaf=self.min_leaf,
                     bootstrapping=self.bootstrapping,
                     sample_weight=sample_weight,
                     time_column=self.time_column,
@@ -199,9 +194,6 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
     (default: "period")
     - max_depth: the maximum depth the trees are enabled to split
     (default: 5)
-    - min_leaf: minimum number of total examples to split. It doesn't make
-    any difference in cases min_leaf < |time_periods| * min_sample_periods
-    (default: 5)
     - min_sample_periods: the number of examples in every period the model
     needs to keep while it splits.
     - max_features: the maximum number of features to be considered in a
@@ -225,7 +217,6 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         n_estimators=5,
         time_column="period",
         max_depth=5,
-        min_leaf=5,
         min_sample_periods=100,
         max_features="auto",
         bootstrapping=True,
@@ -236,7 +227,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         multi=True,
         random_state=42,
     ):
-        self.min_leaf, self.max_depth = min_leaf, max_depth
+        self.max_depth = max_depth
         self.time_column = time_column
         self.min_sample_periods = min_sample_periods
         self.n_estimators = n_estimators
@@ -282,7 +273,6 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
                     y,
                     min_sample_periods=self.min_sample_periods,
                     max_depth=self.max_depth,
-                    min_leaf=self.min_leaf,
                     bootstrapping=self.bootstrapping,
                     sample_weight=sample_weight,
                     time_column=self.time_column,
@@ -304,7 +294,6 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
                     y,
                     min_sample_periods=self.min_sample_periods,
                     max_depth=self.max_depth,
-                    min_leaf=self.min_leaf,
                     bootstrapping=self.bootstrapping,
                     sample_weight=sample_weight,
                     time_column=self.time_column,
@@ -391,36 +380,34 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
 
 class _RandomTimeSplitTree:
     """
-        THe basic class to split data recursively. It's used both for the regressor
-        and classifier. It can be used to learn the Time Robust Tree directly.
+    THe basic class to split data recursively. It's used both for the regressor
+    and classifier. It can be used to learn the Time Robust Tree directly.
 
-        Arguments:
-        - X: pandas DataFrame containing the input features and the time_column.
-        - y: pandas Series or numpy array containing the target.
-        - row_indexes: the indexes from the data we should consider to learn the
-        next split, it's an internal variable to enable the recursion passing to the
-        next call the entire data and indicating the valid indexes.
-        - n_estimators: number of estimators to compose the ensemble (default: 5)
-        - time_column: the column from the input dataframe containing the time
-        periods the model will iterate over to find the best splits (default: "period")
-        - max_depth: the maximum depth the trees are enabled to split (default: 5)
-        - min_leaf: minimum number of total examples to split. It doesn't make any
-    difference in cases min_leaf < |time_periods| * min_sample_periods (default: 5)
-        - min_sample_periods: the number of examples in every period the model needs
-        to keep while it splits.
-        - max_features: the maximum number of features to be considered in a split.
-        It is a fraction, so 1.0 is equivalent to use all the features. The default
-        uses a common heuristic to define it(default: "auto")
-        - bootstrapping: to perform bootstrapping before providing the input data to
-        every estimator (default: True)
-        - criterion: score function to be used when evaluating splits.
-        {"gini": Gini Impurity, "std": Standard deviation reduction}
-        (default: "gini").
-        - split_verbose: to print splits evaluation. It's only recommended for
-        checking pocket examples (default: False).
-        - verbose: shows how many example there are in every period after
-        every split (default: False).
-        - random_state: random seed for the bootstrapping (default: 42).
+    Arguments:
+    - X: pandas DataFrame containing the input features and the time_column.
+    - y: pandas Series or numpy array containing the target.
+    - row_indexes: the indexes from the data we should consider to learn the
+    next split, it's an internal variable to enable the recursion passing to the
+    next call the entire data and indicating the valid indexes.
+    - n_estimators: number of estimators to compose the ensemble (default: 5)
+    - time_column: the column from the input dataframe containing the time
+    periods the model will iterate over to find the best splits (default: "period")
+    - max_depth: the maximum depth the trees are enabled to split (default: 5)
+    - min_sample_periods: the number of examples in every period the model needs
+    to keep while it splits.
+    - max_features: the maximum number of features to be considered in a split.
+    It is a fraction, so 1.0 is equivalent to use all the features. The default
+    uses a common heuristic to define it(default: "auto")
+    - bootstrapping: to perform bootstrapping before providing the input data to
+    every estimator (default: True)
+    - criterion: score function to be used when evaluating splits.
+    {"gini": Gini Impurity, "std": Standard deviation reduction}
+    (default: "gini").
+    - split_verbose: to print splits evaluation. It's only recommended for
+    checking pocket examples (default: False).
+    - verbose: shows how many example there are in every period after
+    every split (default: False).
+    - random_state: random seed for the bootstrapping (default: 42).
 
     """
 
@@ -431,7 +418,6 @@ class _RandomTimeSplitTree:
         row_indexes=[],
         time_column="period",
         max_depth=5,
-        min_leaf=5,
         max_features="auto",
         bootstrapping=True,
         criterion="gini",
@@ -471,7 +457,7 @@ class _RandomTimeSplitTree:
             row_indexes,
             max_depth,
         )
-        self.min_leaf, self.depth = min_leaf, depth
+        self.depth = depth
         self.time_column = time_column
         self.min_sample_periods = min_sample_periods
         self.verbose = verbose
@@ -561,7 +547,6 @@ class _RandomTimeSplitTree:
             min_sample_periods=self.min_sample_periods,
             time_column=self.time_column,
             max_depth=self.max_depth,
-            min_leaf=self.min_leaf,
             criterion=self.criterion,
             period_criterion=self.period_criterion,
             min_impurity_decrease=self.min_impurity_decrease,
@@ -581,7 +566,6 @@ class _RandomTimeSplitTree:
             min_sample_periods=self.min_sample_periods,
             time_column=self.time_column,
             max_depth=self.max_depth,
-            min_leaf=self.min_leaf,
             criterion=self.criterion,
             period_criterion=self.period_criterion,
             min_impurity_decrease=self.min_impurity_decrease,
@@ -620,7 +604,7 @@ class _RandomTimeSplitTree:
             sorted_period_data, sorted_y, sorted_weights, right_period_dict
         )
 
-        for example in range(0, self.n_examples - self.min_leaf - 1):
+        for example in range(0, self.n_examples - self.min_sample_periods - 1):
             x_i, y_i = sorted_x[example], sorted_y[example]
             period_i = sorted_period_data.iloc[example]
             weight_i = sorted_weights[example]
@@ -642,7 +626,10 @@ class _RandomTimeSplitTree:
                     y_i ** 2
                 ) * weight_i
 
-            if example < self.min_leaf or x_i == sorted_x[example + 1]:
+            if (
+                example < self.min_sample_periods
+                or x_i == sorted_x[example + 1]
+            ):
                 continue
             elif not check_min_sample_periods_dict(
                 right_periods_count, self.min_sample_periods
