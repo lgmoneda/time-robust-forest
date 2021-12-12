@@ -62,8 +62,8 @@ params_grid = {"n_estimators": [30, 60, 120],
 			  
 model = TimeForestClassifier(time_column=TIME_COLUMN)
 										
-opt_param = env_wise_hyper_opt(train[features + [TIME_COLUMN]], 
-                               train[TARGET], 
+opt_param = env_wise_hyper_opt(training_data[features + [TIME_COLUMN]], 
+                               training_data[TARGET], 
                                model, 
                                TIME_COLUMN,
                                params_grid,
