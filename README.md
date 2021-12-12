@@ -33,6 +33,8 @@ features = ["x_1", "x_2"]
 time_column = "periods"
 target = "y"
 
+model = TimeForestClassifier(time_column=time_column)
+
 model.fit(training_data[features + [time_column]], training_data[target])
 predictions = model.predict_proba(test_data[features])[:, 1]
 ```
@@ -47,6 +49,29 @@ to keep while it splits.
 aggregated. Options: {"avg": average, "max": maximum, the worst case}.
 (default: "avg")
 
+To use the environment-wise optimization:
+
+```python 
+from time_robust_forest.hyper_opt import env_wise_hyper_opt
+
+params_grid = {"n_estimators": [30, 60, 120], 
+              "max_depth": [5, 10],
+              "min_impurity_decrease": [1e-1, 1e-3, 0],
+              "min_sample_periods": [5, 10, 30],
+              "period_criterion": ["max", "avg"]}
+			  
+model = TimeForestClassifier(time_column=time_column)
+										
+opt_param = env_wise_hyper_opt(training_data[features + [time_column]], 
+                               training_data[TARGET], 
+                               model, 
+                               time_column,
+                               params_grid,
+                               cv=5,
+                               score=roc_auc_score)
+
+```
+
 ### Make sure you have a good choice for the time column
 
 Don't simply use a timestamp column from the dataset, make it discrete before and guarantee there is a reasonable amount of data points in every period. Example: use year if you have 3+ years of data. Notice the choice to make it discrete becomes a modeling choice you can optimize.
@@ -56,6 +81,10 @@ Don't simply use a timestamp column from the dataset, make it discrete before an
 [![License](https://img.shields.io/github/license/lgmoneda/time-robust-forest)](https://github.com/lgmoneda/time-robust-forest/blob/main/LICENSE)
 
 This project is licensed under the terms of the `BSD-3` license. See [LICENSE](https://github.com/lgmoneda/time-robust-forest/blob/main/LICENSE) for more details.
+
+## Useful links 
+
+- [Introducing the Time Robust Tree blog post](http://lgmoneda.github.io/2021/12/03/introducing-time-robust-tree.html)
 
 ## Citation
 
