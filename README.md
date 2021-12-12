@@ -60,12 +60,12 @@ params_grid = {"n_estimators": [30, 60, 120],
               "min_sample_periods": [5, 10, 30],
               "period_criterion": ["max", "avg"]}
 			  
-model = TimeForestClassifier(time_column=TIME_COLUMN)
+model = TimeForestClassifier(time_column=time_column)
 										
-opt_param = env_wise_hyper_opt(training_data[features + [TIME_COLUMN]], 
+opt_param = env_wise_hyper_opt(training_data[features + [time_column]], 
                                training_data[TARGET], 
                                model, 
-                               TIME_COLUMN,
+                               time_column,
                                params_grid,
                                cv=5,
                                score=roc_auc_score)
