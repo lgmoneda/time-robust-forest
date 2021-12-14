@@ -431,6 +431,7 @@ class _RandomTimeSplitTree:
         split_verbose=False,
         impurity_verbose=False,
         random_state=42,
+        rng=None,
     ):
         if len(row_indexes) == 0:
             row_indexes = np.arange(len(y))
@@ -470,7 +471,11 @@ class _RandomTimeSplitTree:
         self.period_criterion = period_criterion
         self.min_impurity_decrease = min_impurity_decrease
         self.total_sample = total_sample
-        self.rng = default_rng(random_state)
+        self.random_state = random_state
+        if rng == None:
+            self.rng = default_rng(self.random_state)
+        else:
+            self.rng = rng
 
         if sample_weight is not None:
             self.sample_weight = sample_weight
@@ -555,6 +560,8 @@ class _RandomTimeSplitTree:
             verbose=self.verbose,
             split_verbose=self.split_verbose,
             impurity_verbose=self.impurity_verbose,
+            random_state=self.random_state,
+            rng=self.rng,
         )
         self.right_split = _RandomTimeSplitTree(
             self.X,
@@ -574,6 +581,8 @@ class _RandomTimeSplitTree:
             verbose=self.verbose,
             split_verbose=self.split_verbose,
             impurity_verbose=self.impurity_verbose,
+            random_state=self.random_state,
+            rng=self.rng,
         )
 
     def find_better_split(self, variable, variable_idx):
