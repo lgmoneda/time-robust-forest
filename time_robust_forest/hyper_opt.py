@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.metrics import make_scorer, roc_auc_score
-from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
 
 def extract_results_from_grid_cv(cv_results, kfolds, envs):
@@ -52,8 +52,8 @@ def leave_one_env_out_cv(data, env_column="period", cv=5):
     """
     envs = data[env_column].unique()
     cv_sets = []
-    kfolds = KFold(n_splits=cv)
-    for train_idx, test_idx in kfolds.split(data):
+    kfolds = StratifiedKFold(n_splits=cv)
+    for train_idx, test_idx in kfolds.split(data, data[env_column]):
         for env in envs:
             all_env_elements = data[data[env_column] == env].index
             test_env_idx = [i for i in test_idx if i in all_env_elements]
