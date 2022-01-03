@@ -75,7 +75,7 @@ def env_wise_score(estimator, X, y, scorer, env, env_column):
     return evaluation
 
 
-def grid_search(X, y, model, param_grid, env_cvs, scorer):
+def grid_search(X, y, model, param_grid, env_cvs, scorer, n_jobs=-1):
     """
     FIt the grid search and return it.
     """
@@ -85,7 +85,7 @@ def grid_search(X, y, model, param_grid, env_cvs, scorer):
         param_grid=param_grid,
         cv=env_cvs,
         scoring=scorer,
-        n_jobs=-1,
+        n_jobs=n_jobs,
         verbose=0,
         refit=False,
     )
@@ -103,6 +103,7 @@ def env_wise_hyper_opt(
     cv=5,
     scorer=make_scorer(roc_auc_score, needs_proba=True),
     ret_results=False,
+    n_jobs=-1,
 ):
     """
     Optimize the hyper parmaters of a model considering the leave one env out
@@ -119,7 +120,7 @@ def env_wise_hyper_opt(
         for env in envs
     }
 
-    grid_cv = grid_search(X, y, model, param_grid, env_cvs, scoring_fs)
+    grid_cv = grid_search(X, y, model, param_grid, env_cvs, scoring_fs, n_jobs)
 
     results_df = extract_results_from_grid_cv(grid_cv.cv_results_, cv, envs)
 
