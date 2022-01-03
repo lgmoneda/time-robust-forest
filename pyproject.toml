@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "time-robust-forest"
-version = "0.1.12"
+version = "0.1.13"
 description = "Explores time information to train a robust random forest"
 readme = "README.md"
 authors = [
