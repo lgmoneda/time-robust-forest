@@ -114,7 +114,7 @@ def env_wise_hyper_opt(
 
     scoring_fs = {
         f"{scorer.__repr__()}_env_{env}": partial(
-            env_wise_score, scorer=scorer, env=env, env_column=environment
+            env_wise_score, scorer=scorer, env=env, env_column=env_column
         )
         for env in envs
     }
