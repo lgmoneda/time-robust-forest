@@ -51,24 +51,25 @@ aggregated. Options: {"avg": average, "max": maximum, the worst case}.
 
 To use the environment-wise optimization:
 
-```python 
+```python
 from time_robust_forest.hyper_opt import env_wise_hyper_opt
 
-params_grid = {"n_estimators": [30, 60, 120], 
+params_grid = {"n_estimators": [30, 60, 120],
               "max_depth": [5, 10],
               "min_impurity_decrease": [1e-1, 1e-3, 0],
               "min_sample_periods": [5, 10, 30],
               "period_criterion": ["max", "avg"]}
-			  
+
 model = TimeForestClassifier(time_column=time_column)
-										
-opt_param = env_wise_hyper_opt(training_data[features + [time_column]], 
-                               training_data[TARGET], 
-                               model, 
+
+opt_param = env_wise_hyper_opt(training_data[features + [time_column]],
+                               training_data[TARGET],
+                               model,
                                time_column,
                                params_grid,
                                cv=5,
-                               score=roc_auc_score)
+                               scorer=make_scorer(roc_auc_score,
+                                                  needs_proba=True))
 
 ```
 
@@ -82,7 +83,7 @@ Don't simply use a timestamp column from the dataset, make it discrete before an
 
 This project is licensed under the terms of the `BSD-3` license. See [LICENSE](https://github.com/lgmoneda/time-robust-forest/blob/main/LICENSE) for more details.
 
-## Useful links 
+## Useful links
 
 - [Introducing the Time Robust Tree blog post](http://lgmoneda.github.io/2021/12/03/introducing-time-robust-tree.html)
 

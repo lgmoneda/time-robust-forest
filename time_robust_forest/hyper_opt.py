@@ -1,3 +1,5 @@
+from functools import partial
+
 import pandas as pd
 from sklearn.metrics import make_scorer, roc_auc_score
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
@@ -5,12 +7,15 @@ from sklearn.model_selection import GridSearchCV, StratifiedKFold
 
 def extract_results_from_grid_cv(cv_results, kfolds, envs):
     """
-    Extract the resuls from a fitted grid search object from sklearn so
+    Extract the resuls from a fitted grid search object from sklearn
+    to enable picking the best using custom logic.
     """
+
     split_keys = [i for i in cv_results.keys() if "split" in i]
 
     split_env = {
-        split_key: envs[i % len(envs)] for i, split_key in enumerate(split_keys)
+        split_key: split_key.split("env_")[-1]
+        for i, split_key in enumerate(split_keys)
     }
     params_idx = [i for i in range(len(cv_results["params"]))]
     all_folds_df = []
@@ -43,26 +48,34 @@ def select_best_model_from_results_df(results_df):
     )
     results_df = results_df.groupby("params_idx").agg(second_agg_dict)
 
-    return results_df.iloc[results_df["perf"].argmax()]["params"]
+    return results_df.iloc[results_df["perf"].argmax()]["params"], results_df
 
 
-def leave_one_env_out_cv(data, env_column="period", cv=5):
+def env_stratified_folds(data, env_column="period", cv=5):
     """
-    Create folds that keep only one environment in the test fold.
+    Create folds that are stratified on the environment.
     """
     envs = data[env_column].unique()
     cv_sets = []
     kfolds = StratifiedKFold(n_splits=cv)
     for train_idx, test_idx in kfolds.split(data, data[env_column]):
-        for env in envs:
-            all_env_elements = data[data[env_column] == env].index
-            test_env_idx = [i for i in test_idx if i in all_env_elements]
-            cv_sets.append((train_idx, test_env_idx))
+        cv_sets.append((train_idx, test_idx))
 
     return cv_sets
 
 
-def grid_search(X, y, model, param_grid, env_cvs, score):
+def env_wise_score(estimator, X, y, scorer, env, env_column):
+    """
+    Filter data to evaluate only a specific environment using a
+    certain scorer.
+    """
+    env_mask = X[env_column] == env
+    evaluation = scorer(estimator, X[env_mask], y[env_mask])
+
+    return evaluation
+
+
+def grid_search(X, y, model, param_grid, env_cvs, scorer):
     """
     FIt the grid search and return it.
     """
@@ -71,9 +84,10 @@ def grid_search(X, y, model, param_grid, env_cvs, score):
         model,
         param_grid=param_grid,
         cv=env_cvs,
-        scoring=make_scorer(score),
+        scoring=scorer,
         n_jobs=-1,
         verbose=0,
+        refit=False,
     )
 
     grid_cv.fit(X, y)
@@ -81,20 +95,37 @@ def grid_search(X, y, model, param_grid, env_cvs, score):
 
 
 def env_wise_hyper_opt(
-    X, y, model, env_column, param_grid, cv=5, score=roc_auc_score
+    X,
+    y,
+    model,
+    env_column,
+    param_grid,
+    cv=5,
+    scorer=make_scorer(roc_auc_score, needs_proba=True),
+    ret_results=False,
 ):
     """
     Optimize the hyper parmaters of a model considering the leave one env out
     cross-validation and selecting the worst case regarding the test performance
     in the different environments.
     """
-    env_cvs = leave_one_env_out_cv(X, env_column, cv)
-
-    grid_cv = grid_search(X, y, model, param_grid, env_cvs, score)
-
+    env_cvs = env_stratified_folds(X, env_column, cv)
     envs = X[env_column].unique()
+
+    scoring_fs = {
+        f"{scorer.__repr__()}_env_{env}": partial(
+            env_wise_score, scorer=scorer, env=env, env_column=env_column
+        )
+        for env in envs
+    }
+
+    grid_cv = grid_search(X, y, model, param_grid, env_cvs, scoring_fs)
+
     results_df = extract_results_from_grid_cv(grid_cv.cv_results_, cv, envs)
 
-    opt_params = select_best_model_from_results_df(results_df)
+    opt_params, agg_results_df = select_best_model_from_results_df(results_df)
+
+    if ret_results:
+        return opt_params, results_df, agg_results_df
 
     return opt_params
