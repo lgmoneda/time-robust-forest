@@ -255,3 +255,25 @@ def check_numerical_match(
             print(result)
         aggregated_metric.append(np.mean(result))
     return np.mean(aggregated_metric)
+
+
+def split_time_index_column_into_n_segments(df, n_segments, time_index_column):
+
+    return pd.cut(
+        df[time_index_column],
+        bins=n_segments,
+        labels=[str(i) for i in range(n_segments)],
+    ).astype(str)
+
+
+def generate_n_segments_columns(df, n_segments, time_index_column):
+
+    random_segments_columns = []
+    for segment in range(0, n_segments):
+        segment_column_name = f"time_column_segment_{str(segment)}"
+        df[segment_column_name] = split_time_index_column_into_n_segments(
+            df, segment + 1, time_index_column
+        )
+        random_segments_columns.append(segment_column_name)
+
+    return random_segments_columns
