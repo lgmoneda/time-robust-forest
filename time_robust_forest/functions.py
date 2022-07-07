@@ -258,7 +258,9 @@ def check_numerical_match(
 
 
 def split_time_index_column_into_n_segments(df, n_segments, time_index_column):
-
+    """
+    Splits the time index / stamp column into n segments.
+    """
     return pd.cut(
         df[time_index_column],
         bins=n_segments,
@@ -267,7 +269,10 @@ def split_time_index_column_into_n_segments(df, n_segments, time_index_column):
 
 
 def generate_n_segments_columns(df, n_segments, time_index_column):
-
+    """
+    Generates n segment columns based in a time_index_column able to order the
+    examples from older to newer.
+    """
     random_segments_columns = []
     for segment in range(0, n_segments):
         segment_column_name = f"time_column_segment_{str(segment)}"
