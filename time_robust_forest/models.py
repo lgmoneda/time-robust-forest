@@ -672,10 +672,10 @@ class _RandomTimeSplitTree:
 
             if self.criterion == "std" or self.criterion == "std_norm":
                 right_period_dict[period_i]["squared_sum"] -= (
-                    y_i ** 2
+                    y_i**2
                 ) * weight_i
                 left_period_dict[period_i]["squared_sum"] += (
-                    y_i ** 2
+                    y_i**2
                 ) * weight_i
 
             if (
