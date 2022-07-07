@@ -11,6 +11,7 @@ from time_robust_forest.functions import (
     check_min_sample_periods,
     check_min_sample_periods_dict,
     fill_right_dict,
+    generate_n_segments_columns,
     impurity_decrease_by_period,
     initialize_period_dict,
     score_by_period,
@@ -225,6 +226,7 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         min_impurity_decrease=0,
         n_jobs=-1,
         multi=True,
+        random_segments=None,
         random_state=42,
     ):
         self.max_depth = max_depth
@@ -238,7 +240,9 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         self.criterion = criterion
         self.period_criterion = period_criterion
         self.min_impurity_decrease = min_impurity_decrease
+        self.random_segments = random_segments
         self.random_state = random_state
+        self.rng = default_rng(self.random_state)
 
     def fit(self, X, y, sample_weight=None, verbose=False):
         """
@@ -261,28 +265,60 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         if type(y) == pd.Series:
             y = y.values
 
+        if type(self.random_segments) == int:
+            X["target_"] = y
+            X.sort_values(by=self.time_column, inplace=True)
+            X["time_index"] = range(1, len(X) + 1)
+            self.random_segments_columns = generate_n_segments_columns(
+                X, self.random_segments, "time_index"
+            )
+
+            y = X["target_"].values
+            X.drop(
+                columns=["time_index", self.time_column, "target_"],
+                inplace=True,
+            )
+        elif self.random_segments == None:
+            self.random_segments = 1
+            self.random_segments_columns = [self.time_column]
+        else:
+            self.random_segments_columns = self.random_segments
+            self.random_segments = len(self.random_segments_columns)
+
         self.train_target_proportion = np.mean(y)
         self.classes_ = np.unique(y)
-        self.total_sample = X[self.time_column].value_counts().to_dict()
 
         self.n_estimators_ = []
+        self.selected_time_columns = [
+            self.random_segments_columns[
+                self.rng.integers(0, self.random_segments)
+            ]
+            for i in range(self.n_estimators)
+        ]
+
+        features = [
+            col for col in X.columns if col not in self.random_segments_columns
+        ]
+
         if not self.multi:
             self.n_estimators_ = [
                 _RandomTimeSplitTree(
-                    X,
+                    X[features + [self.selected_time_columns[i]]],
                     y,
                     min_sample_periods=self.min_sample_periods,
                     max_depth=self.max_depth,
                     bootstrapping=self.bootstrapping,
                     sample_weight=sample_weight,
-                    time_column=self.time_column,
+                    time_column=self.selected_time_columns[i],
                     row_indexes=[],
                     verbose=verbose,
                     max_features=self.max_features,
                     criterion=self.criterion,
                     period_criterion=self.period_criterion,
                     min_impurity_decrease=self.min_impurity_decrease,
-                    total_sample=self.total_sample,
+                    total_sample=X[self.selected_time_columns[i]]
+                    .value_counts()
+                    .to_dict(),
                     random_state=i + self.random_state,
                 )
                 for i in range(self.n_estimators)
@@ -290,19 +326,21 @@ class TimeForestClassifier(BaseEstimator, ClassifierMixin):
         else:
             self.n_estimators_ = Parallel(n_jobs=self.n_jobs, verbose=0)(
                 delayed(_RandomTimeSplitTree)(
-                    X,
+                    X[features + [self.selected_time_columns[i]]],
                     y,
                     min_sample_periods=self.min_sample_periods,
                     max_depth=self.max_depth,
                     bootstrapping=self.bootstrapping,
                     sample_weight=sample_weight,
-                    time_column=self.time_column,
+                    time_column=self.selected_time_columns[i],
                     row_indexes=[],
                     verbose=verbose,
                     max_features=self.max_features,
                     period_criterion=self.period_criterion,
                     min_impurity_decrease=self.min_impurity_decrease,
-                    total_sample=self.total_sample,
+                    total_sample=X[self.selected_time_columns[i]]
+                    .value_counts()
+                    .to_dict(),
                     criterion=self.criterion,
                     random_state=i + self.random_state,
                 )
@@ -484,6 +522,11 @@ class _RandomTimeSplitTree:
 
         self.n_examples = len(row_indexes)
         self.variables = [col for col in X.columns if col != time_column]
+        self.variables = [
+            col for col in self.variables if "time_column" not in col
+        ]
+        ### Xunxo
+        # self.total_sample = X[self.time_column].value_counts().to_dict()
         if max_features == "auto":
             self.max_n_variables = max(int(len(self.variables) ** 0.5), 1)
         else:
@@ -629,10 +672,10 @@ class _RandomTimeSplitTree:
 
             if self.criterion == "std" or self.criterion == "std_norm":
                 right_period_dict[period_i]["squared_sum"] -= (
-                    y_i ** 2
+                    y_i**2
                 ) * weight_i
                 left_period_dict[period_i]["squared_sum"] += (
-                    y_i ** 2
+                    y_i**2
                 ) * weight_i
 
             if (

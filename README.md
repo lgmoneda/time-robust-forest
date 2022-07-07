@@ -77,6 +77,41 @@ opt_param = env_wise_hyper_opt(training_data[features + [time_column]],
 
 Don't simply use a timestamp column from the dataset, make it discrete before and guarantee there is a reasonable amount of data points in every period. Example: use year if you have 3+ years of data. Notice the choice to make it discrete becomes a modeling choice you can optimize.
 
+### Random segments
+
+#### Selecting randomly from multiple time columns
+The user can use a list instead of a string as the `time_column` argument. The model will select randomly from it when building every estimator from the defined `n_estimators`.
+
+```python
+from time_robust_forest.models import TimeForestClassifier
+
+features = ["x_1", "x_2"]
+time_columns = ["periods", "periods_2"]
+target = "y"
+
+model = TimeForestClassifier(time_column=time_columns)
+
+model.fit(training_data[features + time_columns], training_data[target])
+predictions = model.predict_proba(test_data[features])[:, 1]
+```
+
+#### Generating random segments from a timestamp column
+
+The user can define a maximum number of segments (`random_segments`) and the model will split the data using the time stamp information. In the following example, the model segments the data in 1, 2, 3... 10 parts. For every estimator, it picks randomly one of the ten columns representing the `time_column` and use it. In this case, the `time_column` should be the time stamp information.
+
+```python
+from time_robust_forest.models import TimeForestClassifier
+
+features = ["x_1", "x_2"]
+time_column = "time_stamp"
+target = "y"
+
+model = TimeForestClassifier(time_column=time_column, random_segments=10)
+
+model.fit(training_data[features + [time_column]], training_data[target])
+predictions = model.predict_proba(test_data[features])[:, 1]
+```
+
 ## License
 
 [![License](https://img.shields.io/github/license/lgmoneda/time-robust-forest)](https://github.com/lgmoneda/time-robust-forest/blob/main/LICENSE)
