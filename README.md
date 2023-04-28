@@ -121,6 +121,7 @@ This project is licensed under the terms of the `BSD-3` license. See [LICENSE](h
 ## Useful links
 
 - [Introducing the Time Robust Tree blog post](http://lgmoneda.github.io/2021/12/03/introducing-time-robust-tree.html)
+- [Paper](http://lgmoneda.github.io/resources/papers/Time_Robust_Tree.pdf)
 
 ## Citation
 
