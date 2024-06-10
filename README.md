@@ -126,12 +126,12 @@ This project is licensed under the terms of the `BSD-3` license. See [LICENSE](h
 ## Citation
 
 ```
-@misc{time-robust-forest,
-  author = {Moneda, Luis},
-  title = {Time Robust Forest model},
-  year = {2021},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/lgmoneda/time-robust-forest}}
+@inproceedings{moneda2022time,
+  title={Time Robust Trees: Using Temporal Invariance to Improve Generalization},
+  author={Moneda, Luis and Mauá, Denis},
+  booktitle={Brazilian Conference on Intelligent Systems},
+  pages={385--397},
+  year={2022},
+  organization={Springer}
 }
 ```
