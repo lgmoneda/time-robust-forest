@@ -14,7 +14,7 @@
 
 </div>
 
-A Proof of concept model that explores timestamp information to train a random forest with better Out of Distribution generalization power.
+A Proof of concept model that explores timestamp information to train a random forest with better Out-of-distribution generalization power.
 
 ## Installation
 
@@ -39,14 +39,12 @@ model.fit(training_data[features + [time_column]], training_data[target])
 predictions = model.predict_proba(test_data[features])[:, 1]
 ```
 
-There are only a few arguments that differ from a traditional Random Forest. two arguments
+There are only three arguments that differ from a traditional Random Forest.
 
-- time_column: the column from the input dataframe containing the time
-periods the model will iterate over to find the best splits (default: "period")
+- time_column: the column from the input data frame containing the periods the model will iterate over to find the best splits (default: "period")
 - min_sample_periods: the number of examples in every period the model needs
 to keep while it splits.
-- period_criterion: how the performance in every period is going to be
-aggregated. Options: {"avg": average, "max": maximum, the worst case}.
+- period_criterion: how the model will aggregate the performance in every period. Options: {"avg": average, "max": maximum, the worst case}.
 (default: "avg")
 
 To use the environment-wise optimization:
@@ -75,7 +73,7 @@ opt_param = env_wise_hyper_opt(training_data[features + [time_column]],
 
 ### Make sure you have a good choice for the time column
 
-Don't simply use a timestamp column from the dataset, make it discrete before and guarantee there is a reasonable amount of data points in every period. Example: use year if you have 3+ years of data. Notice the choice to make it discrete becomes a modeling choice you can optimize.
+Don't simply use a timestamp column from the dataset; make it discrete before and guarantee there are a reasonable number of data points in every period. For example, use year if you have 3+ years of data. Notice that the choice to make it discrete becomes a modeling choice you can optimize.
 
 ### Random segments
 
@@ -97,7 +95,7 @@ predictions = model.predict_proba(test_data[features])[:, 1]
 
 #### Generating random segments from a timestamp column
 
-The user can define a maximum number of segments (`random_segments`) and the model will split the data using the time stamp information. In the following example, the model segments the data in 1, 2, 3... 10 parts. For every estimator, it picks randomly one of the ten columns representing the `time_column` and use it. In this case, the `time_column` should be the time stamp information.
+The user can define a maximum number of segments (`random_segments`), and the model will split the data using the time stamp information. In the following example, the model segments the data into 1, 2, 3, and 10 parts. For every estimator, it randomly picks one of the ten columns representing the `time_column` and uses it. In this case, the `time_column` should be the time stamp information.
 
 ```python
 from time_robust_forest.models import TimeForestClassifier
